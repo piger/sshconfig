@@ -1,0 +1,11 @@
+Host jumphost
+     Hostname jump.example.com
+     User proxy
+     
+Host example.com, *.example.com, !jump.example.com
+     User root
+     IdentityFile ~/.ssh/foo
+     ProxyCommand ssh -W %h:%p jumphost
+
+Host *
+     IdentitiesOnly on
