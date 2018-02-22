@@ -3,7 +3,12 @@
 This package implements a simple parser for the `ssh_config(5)` configuration file used by
 OpenSSH.
 
-The current aim is **not** to provide a complete parser for `ssh_config(5)`.
+This package at the moment only supports a subset of the syntax used by `ssh_config(5)`; the current
+implemented features are:
+
+- consider only the first value found for each option
+- expand some tokens (like `%h` and `%p`) for specific options (e.g. `ProxyCommand`)
+- `Host` pattern matching and patterns negation are supported
 
 ## Example usage
 
