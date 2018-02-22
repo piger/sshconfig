@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+var patternSeparator *regexp.Regexp = regexp.MustCompile("[ ,]")
+var optSeparator *regexp.Regexp = regexp.MustCompile("(?: *= *| +)")
+
 // SSHOptions is a map containing the SSH configuration for a single hostname
 type SSHOptions map[string]string
 
@@ -24,7 +27,7 @@ func (s *SSHConfig) addBlock(block *configBlock) {
 }
 
 // Lookup return the SSH configuration for a given name
-func (s *SSHConfig) Lookup(name string) SSHOptions {
+func (s *SSHConfig) Lookup(name string) (SSHOptions, error) {
 	result := make(SSHOptions)
 
 	for _, block := range s.blocks {
@@ -35,7 +38,7 @@ func (s *SSHConfig) Lookup(name string) SSHOptions {
 				}
 			}
 		} else if err != nil {
-			log.Fatal(err)
+			return result, err
 		}
 	}
 
@@ -54,7 +57,7 @@ func (s *SSHConfig) Lookup(name string) SSHOptions {
 
 	localUser, err := user.Current()
 	if err != nil {
-		log.Fatal(err)
+		return result, err
 	}
 
 	remoteUser := localUser.Username
@@ -90,7 +93,7 @@ func (s *SSHConfig) Lookup(name string) SSHOptions {
 		}
 	}
 
-	return result
+	return result, nil
 }
 
 // ReadSSHConfig creates new SSHConfig objects by reading a ssh_config file.
@@ -117,8 +120,6 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		// fmt.Printf("line = %q\n", line)
-
 		matches := reHost.FindStringSubmatch(line)
 		if len(matches) == 2 {
 			// is a new host pattern
@@ -135,27 +136,15 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 				log.Fatal("Expected to be in a Host block")
 			}
 
-			values := strings.SplitN(line, " ", 2)
+			values := optSeparator.Split(line, 2)
 			key := strings.ToLower(values[0])
 			value := strings.Trim(values[1], " ")
 			config[key] = value
-			// fmt.Printf("Added %q with %q\n", key, value)
 		}
 	}
 
 	block := newConfigBlock(patterns, config)
 	sshConfig.addBlock(block)
-
-	/*
-		for _, x := range sshConfig.blocks {
-			fmt.Printf("Patterns: %q\n", x.Patterns)
-			fmt.Printf("Configs:\n")
-			for key := range x.Config {
-				fmt.Printf("%q = %q\n", key, x.Config[key])
-			}
-			fmt.Printf("\n")
-		}
-	*/
 
 	return &sshConfig, nil
 }
@@ -167,7 +156,13 @@ type configBlock struct {
 }
 
 func newConfigBlock(patterns string, config SSHOptions) *configBlock {
-	hostPatterns := strings.Split(patterns, " ")
+	var hostPatterns []string
+	for _, pattern := range patternSeparator.Split(patterns, -1) {
+		pattern = strings.Trim(pattern, " ")
+		if len(pattern) > 0 {
+			hostPatterns = append(hostPatterns, pattern)
+		}
+	}
 	block := configBlock{hostPatterns, config}
 	return &block
 }
