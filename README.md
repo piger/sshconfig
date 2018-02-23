@@ -10,6 +10,8 @@ implemented features are:
 - expand some tokens (like `%h` and `%p`) for specific options (e.g. `ProxyCommand`)
 - `Host` pattern matching and patterns negation are supported
 
+See the documentation at [godoc.org](https://godoc.org/github.com/piger/sshconfig).
+
 ## Example usage
 
 You create `SSHConfig` objects by calling `ReadSSHConfig(filename string)` which can be used to
