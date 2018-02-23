@@ -1,3 +1,7 @@
+// Copyright 2018 Daniel Kertesz. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package sshconfig
 
 import (
@@ -8,6 +12,8 @@ import (
 	"regexp"
 	"strings"
 )
+
+// BUG(piger): This parser does not currently supports all the TOKENS used in ssh_config(5).
 
 var patternSeparator *regexp.Regexp = regexp.MustCompile("[ ,]")
 var optSeparator *regexp.Regexp = regexp.MustCompile("(?: *= *| +)")
@@ -26,7 +32,8 @@ func (s *SSHConfig) addBlock(block *configBlock) {
 	s.blocks = append(s.blocks, block)
 }
 
-// Lookup return the SSH configuration for a given name
+// Lookup returns the SSH configuration for a given name; some of the TOKENS used by
+// ssh_config(5) will be expanded (notably %h, %p and %r).
 func (s *SSHConfig) Lookup(name string) (SSHOptions, error) {
 	result := make(SSHOptions)
 
