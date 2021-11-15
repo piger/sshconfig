@@ -127,7 +127,6 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 				block := newConfigBlock(patterns, config)
 				sshConfig.addBlock(block)
 			}
-			patterns = ""
 			config = make(SSHOptions)
 			patterns = matches[1]
 		} else {
