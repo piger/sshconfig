@@ -77,24 +77,16 @@ func (s *SSHConfig) Lookup(name string) (SSHOptions, error) {
 			// Replace some TOKENS
 
 			// %h
-			if strings.Contains(value, "%h") {
-				value = strings.Replace(value, "%h", hostname, -1)
-			}
+			value = strings.Replace(value, "%h", hostname, -1)
 
 			// %p
-			if strings.Contains(value, "%p") {
-				value = strings.Replace(value, "%p", port, -1)
-			}
+			value = strings.Replace(value, "%p", port, -1)
 
 			// %r (remote user)
-			if strings.Contains(value, "%r") {
-				value = strings.Replace(value, "%r", remoteUser, -1)
-			}
+			value = strings.Replace(value, "%r", remoteUser, -1)
 
 			// %u (local user)
-			if strings.Contains(value, "%u") {
-				value = strings.Replace(value, "%u", localUser.Username, -1)
-			}
+			value = strings.Replace(value, "%u", localUser.Username, -1)
 
 			result[optionName] = value
 		}
