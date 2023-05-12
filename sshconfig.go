@@ -114,11 +114,11 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 	scanner := bufio.NewScanner(fh)
 	for scanner.Scan() {
 		line := scanner.Text()
-		line = strings.Trim(line, " ")
+		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		
+
 		matches := hostMatch.FindStringSubmatch(line)
 		if len(matches) == 2 {
 			// is a new host pattern
@@ -136,7 +136,7 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 
 			values := optSeparator.Split(line, 2)
 			key := strings.ToLower(values[0])
-			value := strings.Trim(values[1], " ")
+			value := strings.TrimSpace(values[1])
 			config[key] = value
 		}
 	}
@@ -156,7 +156,7 @@ type configBlock struct {
 func newConfigBlock(patterns string, config SSHOptions) *configBlock {
 	var hostPatterns []string
 	for _, pattern := range patternSeparator.Split(patterns, -1) {
-		pattern = strings.Trim(pattern, " ")
+		pattern = strings.TrimSpace(pattern)
 		if len(pattern) > 0 {
 			hostPatterns = append(hostPatterns, pattern)
 		}
