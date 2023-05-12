@@ -6,7 +6,7 @@ package sshconfig
 
 import (
 	"bufio"
-	"log"
+	"errors"
 	"os"
 	"os/user"
 	"regexp"
@@ -99,9 +99,9 @@ func (s *SSHConfig) Lookup(name string) (SSHOptions, error) {
 func ReadSSHConfig(filename string) (*SSHConfig, error) {
 	sshConfig := SSHConfig{}
 
-	fh, error := os.Open(filename)
-	if error != nil {
-		log.Fatal(error)
+	fh, err := os.Open(filename)
+	if err != nil {
+		return nil, err
 	}
 	defer fh.Close()
 
@@ -109,7 +109,7 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 	config := make(SSHOptions)
 	reHost, err := regexp.Compile("(?i)^host +(.*)")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	scanner := bufio.NewScanner(fh)
@@ -131,7 +131,7 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 			patterns = matches[1]
 		} else {
 			if patterns == "" {
-				log.Fatal("Expected to be in a Host block")
+				return nil, errors.New("expected to be in an Host block")
 			}
 
 			values := optSeparator.Split(line, 2)
