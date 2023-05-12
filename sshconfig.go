@@ -15,8 +15,11 @@ import (
 
 // BUG(piger): This parser does not currently supports all the TOKENS used in ssh_config(5).
 
-var patternSeparator *regexp.Regexp = regexp.MustCompile("[ ,]")
-var optSeparator *regexp.Regexp = regexp.MustCompile("(?: *= *| +)")
+var (
+	patternSeparator = regexp.MustCompile("[ ,]")
+	optSeparator     = regexp.MustCompile("(?: *= *| +)")
+	hostMatch        = regexp.MustCompile("(?i)^host +(.*)")
+)
 
 // SSHOptions is a map containing the SSH configuration for a single hostname
 type SSHOptions map[string]string
@@ -107,10 +110,6 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 
 	var patterns string
 	config := make(SSHOptions)
-	reHost, err := regexp.Compile("(?i)^host +(.*)")
-	if err != nil {
-		return nil, err
-	}
 
 	scanner := bufio.NewScanner(fh)
 	for scanner.Scan() {
@@ -119,7 +118,8 @@ func ReadSSHConfig(filename string) (*SSHConfig, error) {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		matches := reHost.FindStringSubmatch(line)
+		
+		matches := hostMatch.FindStringSubmatch(line)
 		if len(matches) == 2 {
 			// is a new host pattern
 			if patterns != "" {
