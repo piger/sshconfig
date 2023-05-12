@@ -8,27 +8,29 @@ import (
 	"testing"
 )
 
-var patternTests = []struct {
-	name     string
-	patterns []string
-	expected bool
-}{
-	{"example.com", []string{"example.com"}, true},
-	{"example.com", []string{"*.com"}, true},
-	{"app.example.com", []string{"*.example.com"}, true},
-	{"app.example.com", []string{"*.example.com", "!app.example.com"}, false},
-	{"foo.bar", []string{"*.com"}, false},
-}
-
 func TestMatchPatterns(t *testing.T) {
-	for _, pt := range patternTests {
-		actual, err := matchPatterns(pt.name, pt.patterns)
-		if err != nil {
-			t.Errorf("matchPatterns(%s, %q): gave error: %s", pt.name, pt.patterns, err.Error())
-		}
+	tests := []struct {
+		name     string
+		patterns []string
+		expected bool
+	}{
+		{"example.com", []string{"example.com"}, true},
+		{"example.com", []string{"*.com"}, true},
+		{"app.example.com", []string{"*.example.com"}, true},
+		{"app.example.com", []string{"*.example.com", "!app.example.com"}, false},
+		{"foo.bar", []string{"*.com"}, false},
+	}
 
-		if actual != pt.expected {
-			t.Errorf("matchPatterns(%s, %q): expected %t, gave %t", pt.name, pt.patterns, pt.expected, actual)
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual, err := matchPatterns(tt.name, tt.patterns)
+			if err != nil {
+				t.Errorf("matchPatterns(%s, %q): gave error: %s", tt.name, tt.patterns, err.Error())
+			}
+
+			if actual != tt.expected {
+				t.Errorf("matchPatterns(%s, %q): expected %t, gave %t", tt.name, tt.patterns, tt.expected, actual)
+			}
+		})
 	}
 }
